@@ -1,76 +1,87 @@
 pragma solidity ^0.5.0;
 
-import "../node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721Mintable.sol";
 
 /*
   The car contract keeps track of the car owner, car data and all the car events
   during the car life
 */
-contract Car is ERC721Token {
+contract Car is ERC721Full {
 
-  string make;
-
-  string model;
-
-  string chassisId;
-
-  string manufacturingYear;
-
-  string description;
-
-  // IPFS uri for the picture
-  string pictureURL;
-
-  enum EventType { Revision, Reparation }
+  address public owner;  
 
   struct CarEvent {
-    EventType eventType;
+    string eventType;
     string createdAt;
     // IPFS uri for event file attached
     string attachmentUrl;
     string description;
   }
-  
-  // tokenId - carEvent
-  mapping(uint => CarEvent) carEvents;
 
-  event LogCarCreation(string model, string chassisId, string manufacturingYear, string description, string pictureURL);
+  struct CarData {
+    string make; 
+    string model; 
+    string chassisId; 
+    uint manufacturingYear; 
+    string description; 
+    // IPFS uri for the picture
+    string pictureUrl; 
+    
+    uint totalEvents;
+    mapping(uint => CarEvent) events;    
+  }
 
-  event LogEventCreation(EventType eventType, string createdAt, string attachmentUrl, string description);
+  mapping(address => uint) totalUserCars;  
 
-  // Checks if the msg.sender has access to the token by checking token existence and ownership
+  mapping(address => CarData[]) cars;  
+
+  event LogCarCreation(string model, string chassisId, uint manufacturingYear, string description, string pictureUrl);
+
+  event LogEventCreation(string eventType, string createdAt, string attachmentUrl, string description);
+
+  /**
+   * @dev Checks if the msg.sender has access to the token by checking token existence and ownership
+   * @param tokenId identificator of the token
+   */
   modifier hasAccessTo(uint tokenId) {
-    require(exists(_tokenId));
-    require(tokenOwner[_tokenId] == msg.sender);
+    require(_exists(tokenId));
+    require(ownerOf(tokenId) == msg.sender);
+    _;
   }
 
   // ERC721 functions
   /**
-   * @dev Defines the Car token when creating the contract
-   * @param name 
-   * @param symbol 
+   * @dev Defines the Car token when creating the contract 
    */
-  constructor() ERC721Token("CarToken", "CAR") public { }
+  constructor() ERC721Full("CarToken", "CAR") public { 
+    owner = msg.sender;
+  }
 
   /**
    * @dev Mints a token to the msg.sender address
+   *
+   * Anyone can mint a token
    */
-  function mint(string _make, string _model, string _chassisId, string _manufacturingYear, string _description, string _pictureURL) 
-    public returns (uint){
+  function mint(string memory _make, string memory _model, string memory _chassisId, uint _manufacturingYear, string memory _description, string memory _pictureUrl) 
+    public {
 
-      make = _make;
-      model = _model;
-      chassisId = _chassisId;
-      manufacturingYear = _manufacturingYear;
-      description = _description;
-      pictureURL = _pictureURL;
+      cars[msg.sender].push(CarData({
+        make: _make,
+        model: _model,
+        chassisId: _chassisId,
+        manufacturingYear: _manufacturingYear,
+        description: _description,
+        pictureUrl: _pictureUrl,
+        totalEvents: 0
+      }));
+
+      totalUserCars[msg.sender] = totalUserCars[msg.sender] + 1;
 
       uint256 newTokenId = _getNextTokenId();
       _mint(msg.sender, newTokenId);      
 
-      LogCarCreation(model, chassisId, manufacturingYear, description, pictureURL);
-
-      return newTokenId;
+      emit LogCarCreation(_model, _chassisId, _manufacturingYear, _description, _pictureUrl);
   }
 
   /**
@@ -79,34 +90,52 @@ contract Car is ERC721Token {
    * - The tokenId must exist.
    * - Only car owner can create car event.
    */
-  function addCarEvent(uint _tokenId, EventType _eventType, string _createdAt, string _attachmentUrl, string _description) 
+  function addCarEvent(uint _tokenId, string memory _eventType, string memory _createdAt, string memory _attachmentUrl, string memory _description) 
     public 
     hasAccessTo(_tokenId) {
 
-    carEvents[tokenId] = CarEvent{
+    uint totalEvents = cars[msg.sender][_tokenId-1].totalEvents;
+
+    CarEvent memory evt = CarEvent({
       eventType: _eventType,
       createdAt: _createdAt,
       attachmentUrl: _attachmentUrl,
       description: _description
-    }
+    });
 
-    LogEventCreation(_eventType, _createdAt, _attachmentUrl, _description);
+    cars[msg.sender][_tokenId-1].events[totalEvents] = evt;
+
+    cars[msg.sender][_tokenId-1].totalEvents = totalEvents + 1;
+
+    emit LogEventCreation(_eventType, _createdAt, _attachmentUrl, _description);
   }
+
+
+  function carEventsCount(uint _tokenId) 
+      public 
+      view 
+      hasAccessTo(_tokenId)
+      returns (uint) {
+
+    return cars[msg.sender][_tokenId-1].totalEvents;
+  }
+
+  
 
   /**
    * @dev Creates a new car event for a given car tokenId
    * 
    * - Only car owner can retrieve events
    */
-   function getCarEvent(uint _tokenId) 
+   function getCarEvent(uint _tokenId, uint _eventIndex) 
       public 
       view 
       hasAccessTo(_tokenId)
-      returns (EventType, string, string, string) { 
+      returns (string memory, string memory, string memory, string memory) { 
+     
+     CarEvent storage evt = cars[msg.sender][_tokenId-1].events[_eventIndex];
 
-     CarEvent evt = carEvents[_tokenId]; 
-
-     return evt.eventType, evt.createdAt, evt.attachmentUrl, evt.description;     
+     return (evt.eventType, evt.createdAt, evt.attachmentUrl, evt.description);     
    }
 
 
