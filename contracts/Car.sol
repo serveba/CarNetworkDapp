@@ -3,13 +3,16 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Mintable.sol";
 
+import "@openzeppelin/contracts/ownership/Ownable.sol";
+
 /*
   The car contract keeps track of the car owner, car data and all the car events
   during the car life
 */
-contract Car is ERC721Full {
+contract Car is ERC721Full, Ownable {
 
-  address public owner;  
+  // for circuit breaker pattern
+  bool private stopped = false;
 
   struct CarEvent {
     string eventType;
@@ -50,12 +53,32 @@ contract Car is ERC721Full {
     _;
   }
 
+  modifier stopInEmergency { require(!stopped); _; }
+
   // ERC721 functions
   /**
    * @dev Defines the Car token when creating the contract 
    */
-  constructor() ERC721Full("CarToken", "CAR") public { 
-    owner = msg.sender;
+  constructor() ERC721Full("CarToken", "CAR") public { }
+
+  /**
+   * Circuit breaker pattern
+   */
+  function freeze() 
+    public
+    onlyOwner() 
+     {
+       stopped = true;    
+  }
+
+  /**
+   * Circuit breaker pattern
+   */
+  function unfreeze() 
+    public
+    onlyOwner() 
+     {
+       stopped = false;    
   }
 
   /**
@@ -64,7 +87,8 @@ contract Car is ERC721Full {
    * Anyone can mint a token
    */
   function mint(string memory _make, string memory _model, string memory _chassisId, uint _manufacturingYear, string memory _description, string memory _pictureUrl) 
-    public {
+    public
+    stopInEmergency() {
 
       cars[msg.sender].push(CarData({
         make: _make,
@@ -92,7 +116,8 @@ contract Car is ERC721Full {
    */
   function addCarEvent(uint _tokenId, string memory _eventType, string memory _createdAt, string memory _attachmentUrl, string memory _description) 
     public 
-    hasAccessTo(_tokenId) {
+    hasAccessTo(_tokenId) 
+    stopInEmergency() {
 
     uint totalEvents = cars[msg.sender][_tokenId-1].totalEvents;
 

@@ -79,8 +79,36 @@ contract('Car', function(accounts) {
             assert.equal(data[1], createdAt, "Error with the createdAt")
             assert.equal(data[2], attachmentUrl, "Error with the attachmentUrl")
             assert.equal(data[3], eventDescription, "Error with the eventDescription")
+        })        
+    })
+
+    describe("Circuit breaker pattern", () => {
+
+        it("Freezes well", async () => {
+            await instance.mint(make, model, chassisId, manufacturingYear, carDescription, pictureUrl)
+            const tokenId = await instance.tokenOfOwnerByIndex(firstAccount, 0);    
+    
+            await instance.freeze()       
+            await catchRevert(instance.addCarEvent(tokenId, eventType, createdAt, attachmentUrl, eventDescription))
+        })
+
+        it("Unfreezes well", async () => {
+            await instance.mint(make, model, chassisId, manufacturingYear, carDescription, pictureUrl)
+            const tokenId = await instance.tokenOfOwnerByIndex(firstAccount, 0);
+
+            await instance.freeze()
+            await catchRevert(instance.addCarEvent(tokenId, eventType, createdAt, attachmentUrl, eventDescription))
+            await instance.unfreeze()
+
+            await instance.addCarEvent(tokenId, eventType, createdAt, attachmentUrl, eventDescription)
+
+            const data = await instance.getCarEvent(tokenId, 0)
+
+            assert.equal(data[0], eventType, "Error with the eventType")
         })
     })
+
+
 })
 
 
