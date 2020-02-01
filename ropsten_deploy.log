@@ -1,0 +1,113 @@
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+Migrations dry-run (simulation)
+===============================
+> Network name:    'ropsten-fork'
+> Network id:      3
+> Block gas limit: 0x7a1200
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > block number:        7242665
+   > block timestamp:     1580571538
+   > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
+   > balance:             2.996502481
+   > gas used:            125894
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000251788 ETH
+
+   -------------------------------------
+   > Total cost:         0.000251788 ETH
+
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'Car'
+   ---------------
+   > block number:        7242667
+   > block timestamp:     1580571546
+   > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
+   > balance:             2.990645565
+   > gas used:            2901532
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.005803064 ETH
+
+   -------------------------------------
+   > Total cost:         0.005803064 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.006054852 ETH
+
+
+Starting migrations...
+======================
+> Network name:    'ropsten'
+> Network id:      3
+> Block gas limit: 0x7a121d
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0xcaef372a448b76013a0d0bc57e81e9b2f82c64ca84bf6d3bc192646dcc52fea9
+   > Blocks: 2            Seconds: 8
+   > contract address:    0xDc974855FE75C36Ec1024F28039d69D012864877
+   > block number:        7242671
+   > block timestamp:     1580571563
+   > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
+   > balance:             2.994213509
+   > gas used:            127038
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00254076 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.00254076 ETH
+
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'Car'
+   ---------------
+   > transaction hash:    0x720ba713d4298e048360bde0891258259f954800da561a0e765a247be7c79d1b
+   > Blocks: 2            Seconds: 16
+   > contract address:    0x0B24ABA41F3e005d86b6D0e96f73fa93F6A8722A
+   > block number:        7242675
+   > block timestamp:     1580571586
+   > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
+   > balance:             2.944249309
+   > gas used:            2455944
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.04911888 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.04911888 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.05165964 ETH
