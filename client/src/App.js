@@ -3,14 +3,15 @@ import React, { Component } from "react";
 // import getWeb3 from "./getWeb3";
 import ipfs from './ipfs'
 import data from './data.json'
-import Car from "./components/Car";
-import CarCreationModal from "./components/CarCreationModal";
+import CarEvent from "./components/CarEvent";
 
 import Jumbotron from 'react-bootstrap/Jumbotron'
 import Container from 'react-bootstrap/Container'
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
-
+import Modal from 'react-bootstrap/Modal'
+import Form from 'react-bootstrap/Form'
+import Card from 'react-bootstrap/Card'
 
 import "./App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -25,14 +26,34 @@ class App extends Component {
       carPictureBuffer: null,
       carEventBuffer: null,
       data: data,
-      showCarCreationModal: false
+      showCarCreationModal: false,
+      showEventCreationModal: false,
+      carIndexForEvent: 0,
+      
+      make: '',
+      model: '',
+      chassisId: '',
+      manufacturedYear: '',
+      description: '',
+
+      eventType: '',
+      createdAt: '',
+      eventDescription: ''
+
+
+
       //account: null
     }
 
     // console.log(data.cars);
     this.captureCarFile = this.captureCarFile.bind(this);
     this.captureEventFile = this.captureEventFile.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
+    this.onCarSubmit = this.onCarSubmit.bind(this);
+    this.onEventSubmit = this.onEventSubmit.bind(this);
+
+
+    this.handleInputChange = this.handleInputChange.bind(this);
+
   }
 
   captureCarFile(event) {
@@ -57,18 +78,73 @@ class App extends Component {
       this.setState({
         carEventBuffer: Buffer(reader.result)
       })
-      console.log('buffer', this.state.carEventBuffer)
+      console.log('buffer', this.state.carEventBuffer) 
     }
   }
 
-  onSubmit(event) {
+  onCarSubmit(event) {
     event.preventDefault()
+    console.log(this.state);
     ipfs.files.add(this.state.carPictureBuffer, (error, result) => {
       if (error) {
         console.error(error)
         return
       }
       console.log(result[0].hash);
+      this.addNewCar('https://ipfs.io/ipfs/' + result[0].hash)
+      this.handleHideCarCreationModal()      
+    })
+  }
+
+  onEventSubmit(event) {
+    event.preventDefault()
+    console.log(this.state);
+    ipfs.files.add(this.state.carEventBuffer, (error, result) => {
+      if (error) {
+        console.error(error)
+        return
+      }
+      console.log(result[0].hash);
+      this.addNewEvent('https://ipfs.io/ipfs/' + result[0].hash)
+      this.handleHideEventCreationModal()
+    })
+  }
+
+
+  addNewCar(pictureUrl) {
+    const newCar = {
+      make: this.state.make,
+      model: this.state.model,
+      chassisId: this.state.chassisId,
+      manufacturedYear: this.state.manufacturedYear,
+      pictureUrl: pictureUrl,
+      events: []
+    }   
+
+    console.log(this.state.data.cars.concat(newCar))
+
+    this.setState({
+      data: {cars: this.state.data.cars.concat(newCar)}
+    })    
+  }
+
+  addNewEvent(attachmentUrl) {
+    const newEvent = {
+      eventType: this.state.eventType,
+      createdAt: this.state.createdAt,
+      description: this.state.eventDescription,
+      attachmentUrl: attachmentUrl
+    }
+
+    const carsCopy = [...this.state.data.cars]
+
+    carsCopy[this.state.carIndexForEvent].events = carsCopy[this.state.carIndexForEvent].events.concat(newEvent)    
+
+    console.log(carsCopy)
+    this.setState({
+      data: {
+        cars: carsCopy
+      }
     })
   }
 
@@ -115,10 +191,26 @@ class App extends Component {
     this.setState({ storageValue: response });
   };
 
-  setShowCarCreationModal = (show) => {
+  handleShowCarCreationModal = () => this.setState({showCarCreationModal: true})
+  handleHideCarCreationModal = () => this.setState({showCarCreationModal: false})
+  
+  handleShowEventCreationModal = (e) => {    
     this.setState({
-      showCarCreationModal: show
+      showEventCreationModal: true,
+      carIndexForEvent: parseInt(e.target.name, 10)
     })
+  }
+
+  handleHideEventCreationModal = () => this.setState({showEventCreationModal: false})
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   render() {
@@ -126,8 +218,6 @@ class App extends Component {
     //   return <div>Loading Web3, accounts, and contract...</div>;
     // }
     return (
-
-
       <div className="App">
         <Jumbotron>
           <Container> 
@@ -139,41 +229,117 @@ class App extends Component {
             <p>This is my final Project for Consensys Ethereum Developer Bootcamp 2019.</p>
 
             <p> <b>*NOTE: </b>Because this is a proof of the concepts acquired through the course, the UI is very basic. </p> 
-            <Button variant="primary" onClick={this.displayCarCreationModal}>New car</Button>
+            <Button variant="primary" onClick={this.handleShowCarCreationModal}>New car</Button>
           </Container> 
         </Jumbotron>
         
-        < CarCreationModal show={this.state.showCarCreationModal} ></CarCreationModal>        
-
-        {/* 
-        
-        <div>
-          <form onSubmit={this.onSubmit} >            
-            <input type='file' onChange={this.captureFile} />
-            <input type='submit' />
-          </form>
-        </div>
-        */}
-
         <Container>
-            {data.cars.map((c, index) => (              
-              <Row key={index}>
-                <Car                 
-                    make={c.make} 
-                    model={c.model} 
-                    chassisId={c.chassisId} 
-                    manufacturedYear={c.manufacturedYear} 
-                    description={c.description} 
-                    pictureUrl={c.pictureUrl}
-                    events={c.events} >
-                </Car>                               
-              </Row>
+            {this.state.data.cars.map((c, index) => (              
+              <Row className = "d-flex justify-content-center" style={{marginTop: 1 + 'em'}} key={index}>
+                <Card >            
+                  <Card.Body>
+                    <Row className="d-flex justify-content-center">
+                      <a href={c.pictureUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={c.pictureUrl} width="128" height="128" alt=""></img>
+                      </a> 
+
+                    </Row>
+                    <Card.Title>{c.make} {c.model}</Card.Title>
+                    <Card.Text>
+                      {
+                        c.description
+                      }
+                    </Card.Text>
+
+                    <h4>Car events: <Button variant="secondary" size="sm" name={index} onClick={this.handleShowEventCreationModal}>New</Button></h4>     
+                    {c.events.map((e, index) => (
+                      <div key={index}>
+                        <CarEvent eventType={e.eventType} description={e.description} createdAt={e.createdAt} attachmentUrl={e.attachmentUrl}></CarEvent> 
+                      </div>            
+                    ))} 
+                  </Card.Body>
+                </Card>
+              </Row>              
             ))}        
-        </Container>
+        </Container> 
 
-                          
 
-        
+        <Modal show={this.state.showCarCreationModal}>
+          <Modal.Header>
+            <Modal.Title>Creating new Car</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={this.onCarSubmit}>
+              <Form.Group controlId="formMake">
+                <Form.Label>Make</Form.Label>
+                <Form.Control type="text" placeholder="Car Make" name="make" value={this.state.make} onChange={this.handleInputChange}  required />              
+              </Form.Group>
+
+              <Form.Group controlId="formModel">
+                <Form.Label>Model</Form.Label>
+                <Form.Control type="text" placeholder="Car Model" name="model" value={this.state.model} onChange={this.handleInputChange}  required />              
+              </Form.Group>
+
+              <Form.Group controlId="formChassisId">
+                <Form.Label>Chassis number</Form.Label>
+                <Form.Control type="text"  placeholder="Chassis number" name="chassisId" value={this.state.chassisId} onChange={this.handleInputChange}  required />              
+              </Form.Group>
+
+              <Form.Group controlId="formManufacturedYear">
+                <Form.Label>Manufactured year</Form.Label>
+                <Form.Control type="number" maxLength="4" placeholder="Year" name="manufacturedYear" value={this.state.manufacturedYear} onChange={this.handleInputChange}  required/>              
+              </Form.Group>
+
+              <Form.Group controlId="formDescription">
+                <Form.Label>Description</Form.Label>              
+                <Form.Control as="textarea" rows="3"  placeholder="Description" name="description" value={this.state.description} onChange={this.handleInputChange}  required />
+              </Form.Group>
+
+              <Form.Group controlId="formFile">
+                <Form.Label>Car picture</Form.Label>              
+                <Form.Control type="file"  name="pictureUrl" onChange={this.captureCarFile}  required/>
+              </Form.Group>
+
+              <Button variant="primary" type="submit">Save car </Button>  &nbsp;&nbsp;
+              <Button variant="secondary" onClick={this.handleHideCarCreationModal}> Cancel </Button> 
+
+            </Form>
+          </Modal.Body>
+        </Modal>
+
+          <Modal show={this.state.showEventCreationModal}>
+            <Modal.Header>
+              <Modal.Title>Creating new Event</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form onSubmit={this.onEventSubmit}>
+                <Form.Group controlId="formEventType">
+                  <Form.Label>Event type</Form.Label>
+                  <Form.Control type="text" placeholder="Event type" name="eventType" value={this.state.eventType} onChange={this.handleInputChange}  required />              
+                </Form.Group>
+
+                <Form.Group controlId="formCreatedAt">
+                  <Form.Label>Created at</Form.Label>
+                  <Form.Control type="text" placeholder="Created at" name="createdAt" value={this.state.createdAt} onChange={this.handleInputChange}  required />              
+                </Form.Group>   
+
+                <Form.Group controlId="formEventDescription">
+                  <Form.Label>Description</Form.Label>              
+                  <Form.Control as="textarea" rows="3"  placeholder="eventDescription" name="eventDescription" value={this.state.eventDescription} onChange={this.handleInputChange}  required />
+                </Form.Group>
+
+                <Form.Group controlId="formEventFile">
+                  <Form.Label>Event file attachment</Form.Label>              
+                  <Form.Control type="file"  name="attachmentUrl" onChange={this.captureEventFile}  required/>
+                </Form.Group>
+
+                <Button variant="primary" type="submit">Save event </Button>  &nbsp;&nbsp;
+                <Button variant="secondary" onClick={this.handleHideEventCreationModal}> Cancel </Button> 
+
+              </Form>
+            </Modal.Body>
+          </Modal>    
+
       </div>
     );
   }
