@@ -1,0 +1,43 @@
+{
+  "cars": [{
+    "make": "Toyota",
+    "model": "Camry",
+    "chassisId": "SV30-0169266",
+    "manufacturedYear": "2019",
+    "description": "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum ",
+    "pictureUrl": "https://cars.usnews.com/static/images/Auto/izmo/i94428619/2019_toyota_camry_angularfront.jpg",
+    "events": [
+      {
+        "eventType": "Revision", 
+        "createdAt": "2019-12-15", 
+        "description": "Technical inspection", 
+        "attachmentUrl": "https://ipfs.io/ipfs/Qmaw1m3ddEryAPtFpuypmKBRQB2kPHaAHQL4LG56ykdhEG"
+        },
+      {
+        "eventType": "Maintenance",
+        "createdAt": "2019-12-15",
+        "description": "Technical inspection",
+        "attachmentUrl": "https://ipfs.io/ipfs/Qmaw1m3ddEryAPtFpuypmKBRQB2kPHaAHQL4LG56ykdhEG"
+      }
+    ]
+  }, {
+    "make": "Toyota2",
+    "model": "Camry",
+    "chassisId": "SV30-0169266",
+    "manufacturedYear": "2019",
+    "description": "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum ",
+    "pictureUrl": "https://cars.usnews.com/static/images/Auto/izmo/i94428619/2019_toyota_camry_angularfront.jpg",
+    "events": [{
+          "eventType": "Revision",
+          "createdAt": "2019-12-15",
+          "description": "Technical inspection",
+          "attachmentUrl": "https://ipfs.io/ipfs/Qmaw1m3ddEryAPtFpuypmKBRQB2kPHaAHQL4LG56ykdhEG"
+        },
+        {
+          "eventType": "Maintenance",
+          "createdAt": "2019-12-15",
+          "description": "Technical inspection",
+          "attachmentUrl": "https://ipfs.io/ipfs/Qmaw1m3ddEryAPtFpuypmKBRQB2kPHaAHQL4LG56ykdhEG"
+        }]
+  }]
+}

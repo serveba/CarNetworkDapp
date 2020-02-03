@@ -2,25 +2,40 @@ import React, { Component } from "react";
 // import SimpleStorageContract from "./contracts/SimpleStorage.json";
 // import getWeb3 from "./getWeb3";
 import ipfs from './ipfs'
+import data from './data.json'
+import Car from "./components/Car";
+import CarCreationModal from "./components/CarCreationModal";
+
+import Jumbotron from 'react-bootstrap/Jumbotron'
+import Container from 'react-bootstrap/Container'
+import Button from 'react-bootstrap/Button'
+import Row from 'react-bootstrap/Row'
+
 
 import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 class App extends Component {
-
 
   constructor(props) {
     super(props)
 
     this.state = {      
       web3: null,
-      carPictureBuffer: null,      
+      carPictureBuffer: null,
+      carEventBuffer: null,
+      data: data,
+      showCarCreationModal: false
       //account: null
     }
-    this.captureFile = this.captureFile.bind(this);
+
+    // console.log(data.cars);
+    this.captureCarFile = this.captureCarFile.bind(this);
+    this.captureEventFile = this.captureEventFile.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
   }
 
-  captureFile(event) {
+  captureCarFile(event) {
     event.preventDefault()
     const file = event.target.files[0]
     const reader = new window.FileReader()
@@ -30,6 +45,19 @@ class App extends Component {
         carPictureBuffer: Buffer(reader.result)
       })
       console.log('buffer', this.state.carPictureBuffer)
+    }
+  }
+
+  captureEventFile(event) {
+    event.preventDefault()
+    const file = event.target.files[0]
+    const reader = new window.FileReader()
+    reader.readAsArrayBuffer(file)
+    reader.onloadend = () => {
+      this.setState({
+        carEventBuffer: Buffer(reader.result)
+      })
+      console.log('buffer', this.state.carEventBuffer)
     }
   }
 
@@ -87,30 +115,65 @@ class App extends Component {
     this.setState({ storageValue: response });
   };
 
+  setShowCarCreationModal = (show) => {
+    this.setState({
+      showCarCreationModal: show
+    })
+  }
+
   render() {
     // if (!this.state.web3) {
     //   return <div>Loading Web3, accounts, and contract...</div>;
     // }
     return (
-      <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 40</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
 
+
+      <div className="App">
+        <Jumbotron>
+          <Container> 
+            <h1>Welcome to Car Network Dapp!</h1> 
+ 
+            <p>This decentralized application helps you for <b>tracking your car maintenance record on a secure way.</b> <br/>
+            The Dapp uses Ethereum Test Network and IPFS for storing the data and the files respectively.</p>
+
+            <p>This is my final Project for Consensys Ethereum Developer Bootcamp 2019.</p>
+
+            <p> <b>*NOTE: </b>Because this is a proof of the concepts acquired through the course, the UI is very basic. </p> 
+            <Button variant="primary" onClick={this.displayCarCreationModal}>New car</Button>
+          </Container> 
+        </Jumbotron>
+        
+        < CarCreationModal show={this.state.showCarCreationModal} ></CarCreationModal>        
+
+        {/* 
+        
         <div>
-          <form onSubmit={this.onSubmit} >
+          <form onSubmit={this.onSubmit} >            
             <input type='file' onChange={this.captureFile} />
             <input type='submit' />
           </form>
         </div>
+        */}
+
+        <Container>
+            {data.cars.map((c, index) => (              
+              <Row key={index}>
+                <Car                 
+                    make={c.make} 
+                    model={c.model} 
+                    chassisId={c.chassisId} 
+                    manufacturedYear={c.manufacturedYear} 
+                    description={c.description} 
+                    pictureUrl={c.pictureUrl}
+                    events={c.events} >
+                </Car>                               
+              </Row>
+            ))}        
+        </Container>
+
+                          
+
+        
       </div>
     );
   }
