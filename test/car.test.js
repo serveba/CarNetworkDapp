@@ -50,8 +50,11 @@ contract('Car', function(accounts) {
         it("mint() anyone can create a new car token", async () => {
             await instance.mint(make, model, chassisId, manufacturingYear, carDescription, pictureUrl)
             const totalSupply = await instance.totalSupply()
+            const car = await instance.getCarData(0)
+            
             
             assert.equal(totalSupply, 1, "Error minting the token")
+            assert.equal(car[3], manufacturingYear, "Error with the manufacturingYear")
         })
 
         it("checking tokenIds; anyone can retrieve its own token Ids", async () => {

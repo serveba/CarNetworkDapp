@@ -3,6 +3,7 @@ Compiling your contracts...
 > Everything is up to date, there is nothing to compile.
 
 
+
 Migrations dry-run (simulation)
 ===============================
 > Network name:    'ropsten-fork'
@@ -15,17 +16,17 @@ Migrations dry-run (simulation)
 
    Deploying 'Migrations'
    ----------------------
-   > block number:        7242665
-   > block timestamp:     1580571538
+   > block number:        7253404
+   > block timestamp:     1580715954
    > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
-   > balance:             2.996502481
-   > gas used:            125894
+   > balance:             2.938398393
+   > gas used:            112038
    > gas price:           2 gwei
    > value sent:          0 ETH
-   > total cost:          0.000251788 ETH
+   > total cost:          0.000224076 ETH
 
    -------------------------------------
-   > Total cost:         0.000251788 ETH
+   > Total cost:         0.000224076 ETH
 
 
 2_deploy_contracts.js
@@ -33,23 +34,26 @@ Migrations dry-run (simulation)
 
    Deploying 'Car'
    ---------------
-   > block number:        7242667
-   > block timestamp:     1580571546
+   > block number:        7253406
+   > block timestamp:     1580716103
    > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
-   > balance:             2.990645565
-   > gas used:            2901532
+   > balance:             2.932597945
+   > gas used:            2872958
    > gas price:           2 gwei
    > value sent:          0 ETH
-   > total cost:          0.005803064 ETH
+   > total cost:          0.005745916 ETH
 
    -------------------------------------
-   > Total cost:         0.005803064 ETH
+   > Total cost:         0.005745916 ETH
 
 
 Summary
 =======
 > Total deployments:   2
-> Final cost:          0.006054852 ETH
+> Final cost:          0.005969992 ETH
+
+
+
 
 
 Starting migrations...
@@ -64,13 +68,13 @@ Starting migrations...
 
    Deploying 'Migrations'
    ----------------------
-   > transaction hash:    0xcaef372a448b76013a0d0bc57e81e9b2f82c64ca84bf6d3bc192646dcc52fea9
-   > Blocks: 2            Seconds: 8
-   > contract address:    0xDc974855FE75C36Ec1024F28039d69D012864877
-   > block number:        7242671
-   > block timestamp:     1580571563
+   > transaction hash:    0xb49ff58f8d8ce03957c1557f3dd3dc080154946000c160bd4a7e210de709dc30
+   > Blocks: 0            Seconds: 40
+   > contract address:    0xF24e21877043e33c6C9C552508165Dd957e1dBE4
+   > block number:        7253416
+   > block timestamp:     1580716091
    > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
-   > balance:             2.994213509
+   > balance:             2.936081709
    > gas used:            127038
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -88,26 +92,26 @@ Starting migrations...
 
    Deploying 'Car'
    ---------------
-   > transaction hash:    0x720ba713d4298e048360bde0891258259f954800da561a0e765a247be7c79d1b
-   > Blocks: 2            Seconds: 16
-   > contract address:    0x0B24ABA41F3e005d86b6D0e96f73fa93F6A8722A
-   > block number:        7242675
-   > block timestamp:     1580571586
+   > transaction hash:    0xccd1446502ed32ed2c73479f639f5d9b183d6d2ca65b943bd0fb1253df1c84a0
+   > Blocks: 0            Seconds: 56
+   > contract address:    0x96049CB396Cc3DBe336B8a1B842fbaa78472305E
+   > block number:        7253419
+   > block timestamp:     1580716164
    > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
-   > balance:             2.944249309
-   > gas used:            2455944
+   > balance:             2.875977229
+   > gas used:            2962958
    > gas price:           20 gwei
    > value sent:          0 ETH
-   > total cost:          0.04911888 ETH
+   > total cost:          0.05925916 ETH
 
 
    > Saving migration to chain.
    > Saving artifacts
    -------------------------------------
-   > Total cost:          0.04911888 ETH
+   > Total cost:          0.05925916 ETH
 
 
 Summary
 =======
 > Total deployments:   2
-> Final cost:          0.05165964 ETH
+> Final cost:          0.06179992 ETH

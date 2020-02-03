@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-// import SimpleStorageContract from "./contracts/SimpleStorage.json";
-// import getWeb3 from "./getWeb3";
+import CarContract from "./contracts/Car.json";
+import getWeb3 from "./getWeb3";
 import ipfs from './ipfs'
-import data from './data.json'
+// import data from './data.json'
 import CarEvent from "./components/CarEvent";
 
 import Jumbotron from 'react-bootstrap/Jumbotron'
@@ -23,29 +23,29 @@ class App extends Component {
 
     this.state = {      
       web3: null,
-      carPictureBuffer: null,
-      carEventBuffer: null,
-      data: data,
+      account: null,
+      contract: null,
+      
+      data: { cars: [] },     
+      
       showCarCreationModal: false,
       showEventCreationModal: false,
-      carIndexForEvent: 0,
       
       make: '',
       model: '',
       chassisId: '',
-      manufacturedYear: '',
+      manufacturingYear: '',
       description: '',
-
+      tokenId: '',
+      carPictureBuffer: null,
+      
+      carIndexForEvent: 0,
       eventType: '',
       createdAt: '',
-      eventDescription: ''
-
-
-
-      //account: null
+      eventDescription: '',
+      carEventBuffer: null
     }
 
-    // console.log(data.cars);
     this.captureCarFile = this.captureCarFile.bind(this);
     this.captureEventFile = this.captureEventFile.bind(this);
     this.onCarSubmit = this.onCarSubmit.bind(this);
@@ -53,7 +53,6 @@ class App extends Component {
 
 
     this.handleInputChange = this.handleInputChange.bind(this);
-
   }
 
   captureCarFile(event) {
@@ -65,7 +64,6 @@ class App extends Component {
       this.setState({
         carPictureBuffer: Buffer(reader.result)
       })
-      console.log('buffer', this.state.carPictureBuffer)
     }
   }
 
@@ -78,19 +76,16 @@ class App extends Component {
       this.setState({
         carEventBuffer: Buffer(reader.result)
       })
-      console.log('buffer', this.state.carEventBuffer) 
     }
   }
 
   onCarSubmit(event) {
     event.preventDefault()
-    console.log(this.state);
     ipfs.files.add(this.state.carPictureBuffer, (error, result) => {
       if (error) {
         console.error(error)
         return
       }
-      console.log(result[0].hash);
       this.addNewCar('https://ipfs.io/ipfs/' + result[0].hash)
       this.handleHideCarCreationModal()      
     })
@@ -98,37 +93,54 @@ class App extends Component {
 
   onEventSubmit(event) {
     event.preventDefault()
-    console.log(this.state);
     ipfs.files.add(this.state.carEventBuffer, (error, result) => {
       if (error) {
         console.error(error)
         return
       }
-      console.log(result[0].hash);
       this.addNewEvent('https://ipfs.io/ipfs/' + result[0].hash)
       this.handleHideEventCreationModal()
     })
   }
 
-
-  addNewCar(pictureUrl) {
+  /**
+   * This function mints a new token and updates the state variable for car data
+   */
+  addNewCar = async (pictureUrl) => {
     const newCar = {
       make: this.state.make,
       model: this.state.model,
       chassisId: this.state.chassisId,
-      manufacturedYear: this.state.manufacturedYear,
+      description: this.state.description,
+      manufacturingYear: this.state.manufacturingYear,
       pictureUrl: pictureUrl,
       events: []
     }   
 
-    console.log(this.state.data.cars.concat(newCar))
+    // Minting a new car token
+    const _gasLimit = 900000
+    const tx= await this.state.contract.methods.mint(newCar.make, newCar.model, newCar.chassisId, 
+      newCar.manufacturingYear, newCar.description, newCar.pictureUrl).send({
+        from: this.state.accounts[0],
+        gas: _gasLimit
+      })     
+
+      console.log('tx:', tx)
 
     this.setState({
-      data: {cars: this.state.data.cars.concat(newCar)}
+      data: {cars: this.state.data.cars.concat(newCar)},
+      // clearing car modal window
+      make: '',
+      model: '',
+      chassisId: '',
+      manufacturingYear: '',
+      description: '',
+      pictureUrl: '',
     })    
   }
 
-  addNewEvent(attachmentUrl) {
+
+  addNewEvent = async (attachmentUrl) => {
     const newEvent = {
       eventType: this.state.eventType,
       createdAt: this.state.createdAt,
@@ -139,57 +151,123 @@ class App extends Component {
     const carsCopy = [...this.state.data.cars]
 
     carsCopy[this.state.carIndexForEvent].events = carsCopy[this.state.carIndexForEvent].events.concat(newEvent)    
+   
+    // adding car event
+    const _gasLimit = 900000
+    const tokenId = this.state.carIndexForEvent + 1
 
-    console.log(carsCopy)
+    const tx = await this.state.contract.methods.addCarEvent(tokenId, newEvent.eventType, newEvent.createdAt,
+      newEvent.attachmentUrl, newEvent.description).send({
+      from: this.state.accounts[0],
+      gas: _gasLimit
+    })
+
+    console.log('tx:', tx)
+
     this.setState({
       data: {
         cars: carsCopy
-      }
+      },
+      // clearing event modal window
+      eventType: '',
+      eventDescription: '',
+      createdAt: '',
+      attachmentUrl: ''
     })
   }
 
-  // state = { storageValue: 0, web3: null, accounts: null, contract: null };
 
   componentDidMount = async () => {
-    // try {
-    //   // Get network provider and web3 instance.
-    //   const web3 = await getWeb3();
+    try {
+      // Get network provider and web3 instance.
+      const web3 = await getWeb3();
+      console.log('web3: ', web3)
 
-    //   // Use web3 to get the user's accounts.
-    //   const accounts = await web3.eth.getAccounts();
+      //
+      // Use web3 to get the user's accounts.
+      const accounts = await web3.eth.getAccounts();
+      console.log('account[0]: ', accounts[0])
 
-    //   // Get the contract instance.
-    //   const networkId = await web3.eth.net.getId();
-    //   const deployedNetwork = SimpleStorageContract.networks[networkId];
-    //   const instance = new web3.eth.Contract(
-    //     SimpleStorageContract.abi,
-    //     deployedNetwork && deployedNetwork.address,
-    //   );
+      // Get the contract instance.
+      const networkId = await web3.eth.net.getId();
+            console.log('networkId:', networkId)
 
-    //   // Set web3, accounts, and contract to the state, and then proceed with an
-    //   // example of interacting with the contract's methods.
-    //   this.setState({ web3, accounts, contract: instance }, this.runExample);
-    // } catch (error) {
-    //   // Catch any errors for any of the above operations.
-    //   alert(
-    //     `Failed to load web3, accounts, or contract. Check console for details.`,
-    //   );
-    //   console.error(error);
-    // }
+      const deployedNetwork = CarContract.networks[networkId];
+
+      // console.log('deployedNetwork:', deployedNetwork)
+
+      const instance = new web3.eth.Contract(
+        CarContract.abi,
+        deployedNetwork && deployedNetwork.address,
+      );
+
+      console.log('Contract network address: ', deployedNetwork.address)
+
+      // Set web3, accounts, and contract to the state, and then proceed with an
+      // example of interacting with the contract's methods.
+      // this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance })
+
+      this.loadDataFromBlockchain()
+
+    } catch (error) {
+      // Catch any errors for any of the above operations.
+      alert(
+        `Failed to load web3, accounts, or contract. Check console for details.`,
+      );
+      console.error(error);
+    }
   };
 
-  runExample = async () => {
-    const { accounts, contract } = this.state;
+  loadDataFromBlockchain = async () => {
+    const c = this.state.contract    
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+    const balance = await c.methods.balanceOf(this.state.accounts[0]).call()
+    console.log('balance:', balance)
 
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
+    let loadedCars = []
 
-    // Update state with the result.
-    this.setState({ storageValue: response });
-  };
+    for (let i = 0; i < balance; i++) {
+      // retrieve car data
+      const carData = await c.methods.getCarData(i).call()           
+        loadedCars.push({
+          make: carData[0],
+          model: carData[1],
+          chassisId: carData[2],
+          manufacturingYear: carData[3],
+          description: carData[4],
+          pictureUrl: carData[5],
+          events: []       
+        })
+
+        const tokenId = await c.methods.tokenOfOwnerByIndex(this.state.accounts[0], i).call()
+        console.log('tokenId:', tokenId)
+
+        const totalEvents = await c.methods.carEventsCount(tokenId).call()
+        console.log('totalEvents:', totalEvents)
+
+        for(let j = 0; j < totalEvents; j++) {
+          // retrieve car event
+          const eventData = await c.methods.getCarEvent(tokenId, j).call()
+          console.log('eventData:', eventData)
+
+          loadedCars[i].events.push({
+            eventType: eventData[0],
+            createdAt: eventData[1],
+            attachmentUrl: eventData[2],
+            description: eventData[3],
+          })
+        }
+    } 
+
+    console.log('loadedCars:', loadedCars)
+
+    this.setState({
+      data: {
+        cars: loadedCars
+      }
+    })
+  }
 
   handleShowCarCreationModal = () => this.setState({showCarCreationModal: true})
   handleHideCarCreationModal = () => this.setState({showCarCreationModal: false})
@@ -214,9 +292,9 @@ class App extends Component {
   }
 
   render() {
-    // if (!this.state.web3) {
-    //   return <div>Loading Web3, accounts, and contract...</div>;
-    // }
+    if (!this.state.web3) {
+      return <div>Loading Web3, accounts, and contract...</div>;
+    }
     return (
       <div className="App">
         <Jumbotron>
@@ -246,11 +324,8 @@ class App extends Component {
                     </Row>
                     <Card.Title>{c.make} {c.model}</Card.Title>
                     <Card.Text>
-                      {
-                        c.description
-                      }
+                      {c.chassisId} - ({c.manufacturingYear}): <br></br> {c.description}
                     </Card.Text>
-
                     <h4>Car events: <Button variant="secondary" size="sm" name={index} onClick={this.handleShowEventCreationModal}>New</Button></h4>     
                     {c.events.map((e, index) => (
                       <div key={index}>
@@ -285,9 +360,9 @@ class App extends Component {
                 <Form.Control type="text"  placeholder="Chassis number" name="chassisId" value={this.state.chassisId} onChange={this.handleInputChange}  required />              
               </Form.Group>
 
-              <Form.Group controlId="formManufacturedYear">
+              <Form.Group controlId="formmanufacturingYear">
                 <Form.Label>Manufactured year</Form.Label>
-                <Form.Control type="number" maxLength="4" placeholder="Year" name="manufacturedYear" value={this.state.manufacturedYear} onChange={this.handleInputChange}  required/>              
+                <Form.Control type="number" maxLength="4" placeholder="Year" name="manufacturingYear" value={this.state.manufacturingYear} onChange={this.handleInputChange}  required/>              
               </Form.Group>
 
               <Form.Group controlId="formDescription">

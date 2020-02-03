@@ -22,7 +22,7 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 const fs = require('fs');
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+const mnemonic = fs.readFileSync("/Users/serveba/workspace_golang/src/CarNetworkDapp/.secret").toString().trim();
 
 module.exports = {
   /**
@@ -46,6 +46,7 @@ module.exports = {
       host: "127.0.0.1", // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
       network_id: "*", // Any network (default: none)
+      // gas: 8500000
     },
 
     // Another network with more advanced options...

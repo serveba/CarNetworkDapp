@@ -1,0 +1,29 @@
+Ropsten network:
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'Car'
+   ---------------
+   > transaction hash:    0xccd1446502ed32ed2c73479f639f5d9b183d6d2ca65b943bd0fb1253df1c84a0
+   > Blocks: 0            Seconds: 56
+   > contract address:    0x96049CB396Cc3DBe336B8a1B842fbaa78472305E
+   > block number:        7253419
+   > block timestamp:     1580716164
+   > account:             0xDcBe2e7e4442F1b56F968977e7D7C53a8c89681D
+   > balance:             2.875977229
+   > gas used:            2962958
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.05925916 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.05925916 ETH
+
+
+https://ropsten.etherscan.io/address/0x96049cb396cc3dbe336b8a1b842fbaa78472305e
+
+

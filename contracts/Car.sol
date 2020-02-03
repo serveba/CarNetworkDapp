@@ -108,6 +108,22 @@ contract Car is ERC721Full, Ownable {
       emit LogCarCreation(_model, _chassisId, _manufacturingYear, _description, _pictureUrl);
   }
 
+
+  /**
+   * @dev Creates a new car event for a given car tokenId
+   * 
+   * - Only car owner can retrieve events
+   */
+   function getCarData(uint _carIndex) 
+      public 
+      view 
+      returns (string memory, string memory, string memory, uint, string memory, string memory) { 
+
+        CarData storage c = cars[msg.sender][_carIndex];
+
+        return (c.make, c.model, c.chassisId, c.manufacturingYear, c.description, c.pictureUrl);
+   }
+
   /**
    * @dev Creates a new car event for a given car tokenId
    *
