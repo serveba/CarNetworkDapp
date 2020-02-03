@@ -25,6 +25,7 @@ class App extends Component {
       web3: null,
       account: null,
       contract: null,
+      defaultAccount: null,
       
       data: { cars: [] },     
       
@@ -121,7 +122,7 @@ class App extends Component {
     const _gasLimit = 900000
     const tx= await this.state.contract.methods.mint(newCar.make, newCar.model, newCar.chassisId, 
       newCar.manufacturingYear, newCar.description, newCar.pictureUrl).send({
-        from: this.state.accounts[0],
+        from: this.state.defaultAccount,
         gas: _gasLimit
       })     
 
@@ -158,7 +159,7 @@ class App extends Component {
 
     const tx = await this.state.contract.methods.addCarEvent(tokenId, newEvent.eventType, newEvent.createdAt,
       newEvent.attachmentUrl, newEvent.description).send({
-      from: this.state.accounts[0],
+      from: this.state.defaultAccount,
       gas: _gasLimit
     })
 
@@ -186,7 +187,9 @@ class App extends Component {
       //
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
-      console.log('account[0]: ', accounts[0])
+      
+      const defaultAccount = accounts[1]
+      console.log('default Account: ', accounts[1])
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
@@ -206,7 +209,7 @@ class App extends Component {
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
       // this.setState({ web3, accounts, contract: instance }, this.runExample);
-      this.setState({ web3, accounts, contract: instance })
+      this.setState({ web3, accounts, defaultAccount, contract: instance })
 
       this.loadDataFromBlockchain()
 
@@ -222,7 +225,7 @@ class App extends Component {
   loadDataFromBlockchain = async () => {
     const c = this.state.contract    
 
-    const balance = await c.methods.balanceOf(this.state.accounts[0]).call()
+    const balance = await c.methods.balanceOf(this.state.defaultAccount).call()
     console.log('balance:', balance)
 
     let loadedCars = []
@@ -240,7 +243,7 @@ class App extends Component {
           events: []       
         })
 
-        const tokenId = await c.methods.tokenOfOwnerByIndex(this.state.accounts[0], i).call()
+        const tokenId = await c.methods.tokenOfOwnerByIndex(this.state.defaultAccount, i).call()
         console.log('tokenId:', tokenId)
 
         const totalEvents = await c.methods.carEventsCount(tokenId).call()
