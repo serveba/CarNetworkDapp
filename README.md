@@ -33,3 +33,14 @@ This application allows users to create cars (ERC721 tokens) and add events with
   Migrate:        truffle migrate
   Test contracts: truffle test
 ```
+
+## Code Commands
+
+Running the project:
+```bash
+  # run ganache locally at port 8545
+  truffle test
+  truffle migrate
+  cd client
+  yarn start
+```
